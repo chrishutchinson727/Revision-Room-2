@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - '.github/workflows/set-line-spacing-105.yml'
+      - 'tools/set_line_spacing_105.py'
 
 permissions:
   contents: write
