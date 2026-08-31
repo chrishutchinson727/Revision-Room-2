@@ -1,0 +1,38 @@
+name: Apply poem text options
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-text-options.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Apply poem text options
+        run: python tools/apply_text_options.py
+      - name: Check JavaScript syntax
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text()
+          js=s.split('<script>',1)[1].split('</script>',1)[0]
+          Path('/tmp/revision-room.js').write_text(js)
+          PY
+          node --check /tmp/revision-room.js
+      - name: Commit patched app
+        run: |
+          git config user.name "Revision Room updater"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "No changes needed"
+          else
+            git commit -m "Add poem font and size options"
+            git push
+          fi
